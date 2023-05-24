@@ -4,25 +4,9 @@ require("hardhat-contract-sizer")
 require('@typechain/hardhat')
 
 const {
-  BSC_URL,
-  BSC_DEPLOY_KEY,
-  BSCSCAN_API_KEY,
-  POLYGONSCAN_API_KEY,
-  SNOWTRACE_API_KEY,
-  ARBISCAN_API_KEY,
-  ETHERSCAN_API_KEY,
-  BSC_TESTNET_URL,
-  BSC_TESTNET_DEPLOY_KEY,
-  ARBITRUM_TESTNET_DEPLOY_KEY,
-  ARBITRUM_TESTNET_URL,
-  ARBITRUM_DEPLOY_KEY,
-  ARBITRUM_URL,
-  AVAX_DEPLOY_KEY,
-  AVAX_URL,
-  POLYGON_DEPLOY_KEY,
-  POLYGON_URL,
-  MAINNET_URL,
-  MAINNET_DEPLOY_KEY
+  BASE_URL,
+  BASE_DEPLOY_KEY,
+  BASESCAN_API_KEY,
 } = require("./env.json")
 
 // This is a sample Hardhat task. To learn how to create your own go to
@@ -49,7 +33,12 @@ module.exports = {
     hardhat: {
       allowUnlimitedContractSize: true
     },
-    bsc: {
+    base: {
+      url:BASE_URL,
+      chainId:84531,
+      accounts: [BASE_DEPLOY_KEY]
+    }
+/*    bsc: {
       url: BSC_URL,
       chainId: 56,
       gasPrice: 10000000000,
@@ -89,16 +78,22 @@ module.exports = {
       url: MAINNET_URL,
       gasPrice: 50000000000,
       accounts: [MAINNET_DEPLOY_KEY]
-    }
+    }*/
   },
   etherscan: {
     apiKey: {
-      mainnet: MAINNET_DEPLOY_KEY,
-      arbitrumOne: ARBISCAN_API_KEY,
-      avalanche: SNOWTRACE_API_KEY,
-      bsc: BSCSCAN_API_KEY,
-      polygon: POLYGONSCAN_API_KEY,
-    }
+      base: BASESCAN_API_KEY,
+    },
+    customChains: [
+      {
+        network: "base",
+        chainId: 84531,
+        urls: {
+          apiURL: "https://api-goerli.basescan.org/api",
+          browserURL: "https://goerli.basescan.org"
+        }
+      }
+    ]
   },
   solidity: {
     version: "0.6.12",

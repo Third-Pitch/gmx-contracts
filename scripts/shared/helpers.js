@@ -6,22 +6,27 @@ const network = (process.env.HARDHAT_NETWORK || 'mainnet');
 
 const ARBITRUM = 42161
 const AVALANCHE = 43114
+const BASE = 84531
 
 const {
   ARBITRUM_URL,
   AVAX_URL,
   ARBITRUM_DEPLOY_KEY,
-  AVAX_DEPLOY_KEY
+  AVAX_DEPLOY_KEY,
+  BASE_URL,
+  BASE_DEPLOY_KEY,
 } = require("../../env.json")
 
 const providers = {
-  arbitrum: new ethers.providers.JsonRpcProvider(ARBITRUM_URL),
-  avax: new ethers.providers.JsonRpcProvider(AVAX_URL)
+  // arbitrum: new ethers.providers.JsonRpcProvider(ARBITRUM_URL),
+  // avax: new ethers.providers.JsonRpcProvider(AVAX_URL),
+  base: new ethers.providers.JsonRpcProvider(BASE_URL),
 }
 
 const signers = {
-  arbitrum: new ethers.Wallet(ARBITRUM_DEPLOY_KEY).connect(providers.arbitrum),
-  avax: new ethers.Wallet(ARBITRUM_DEPLOY_KEY).connect(providers.avax)
+  // arbitrum: new ethers.Wallet(ARBITRUM_DEPLOY_KEY).connect(providers.arbitrum),
+  // avax: new ethers.Wallet(ARBITRUM_DEPLOY_KEY).connect(providers.avax),
+  base: new ethers.Wallet(BASE_DEPLOY_KEY).connect(providers.base)
 }
 
 function sleep(ms) {
@@ -51,6 +56,10 @@ function getChainId(network) {
     return 43114
   }
 
+  if (network === "base") {
+    return 84531
+  }
+
   throw new Error("Unsupported network")
 }
 
@@ -74,6 +83,13 @@ async function sendTxn(txnPromise, label) {
   console.info(`... Sent! ${txn.hash}`)
   await sleep(2000)
   return txn
+}
+
+async function sendEther(to, amount) {
+  return await signers[0].sendTransaction({
+    to: to,
+    value: amount, // Sends exactly 1.0 ether
+  });
 }
 
 async function callWithRetries(func, args, retriesCount = 3) {
@@ -101,13 +117,13 @@ async function deployContract(name, args, label, options) {
 
   let info = name
   if (label) { info = name + ":" + label }
-  const contractFactory = await ethers.getContractFactory(name)
-  let contract
+  let contractFactory
   if (options) {
-    contract = await contractFactory.deploy(...args, options)
+    contractFactory = await ethers.getContractFactory(name,options)
   } else {
-    contract = await contractFactory.deploy(...args)
+    contractFactory = await ethers.getContractFactory(name)
   }
+  const contract = await contractFactory.deploy(...args)
   const argStr = args.map((i) => `"${i}"`).join(" ")
   console.info(`Deploying ${info} ${contract.address} ${argStr}`)
   await contract.deployTransaction.wait()
@@ -178,6 +194,7 @@ async function updateTokensPerInterval(distributor, tokensPerInterval, label) {
 module.exports = {
   ARBITRUM,
   AVALANCHE,
+  BASE,
   providers,
   signers,
   readCsv,
@@ -190,5 +207,6 @@ module.exports = {
   callWithRetries,
   processBatch,
   updateTokensPerInterval,
-  sleep
+  sleep,
+  sendEther
 }

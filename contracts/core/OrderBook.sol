@@ -416,7 +416,6 @@ contract OrderBook is ReentrancyGuard, IOrderBook {
         // USDG_PRECISION is the same as 1 USDG
         uint256 redemptionAmount = IVault(vault).getRedemptionAmount(_otherToken, USDG_PRECISION);
         uint256 otherTokenPrice = IVault(vault).getMinPrice(_otherToken);
-
         uint256 otherTokenDecimals = IVault(vault).tokenDecimals(_otherToken);
         return redemptionAmount.mul(otherTokenPrice).div(10 ** otherTokenDecimals);
     }
@@ -601,7 +600,6 @@ contract OrderBook is ReentrancyGuard, IOrderBook {
     ) external payable nonReentrant {
         // always need this call because of mandatory executionFee user has to transfer in ETH
         _transferInETH();
-
         require(_executionFee >= minExecutionFee, "OrderBook: insufficient execution fee");
         if (_shouldWrap) {
             require(_path[0] == weth, "OrderBook: only weth could be wrapped");

@@ -21,7 +21,7 @@ contract VaultPriceFeed is IVaultPriceFeed {
     uint256 public constant MAX_ADJUSTMENT_BASIS_POINTS = 20;
 
     // Identifier of the Sequencer offline flag on the Flags contract
-    address constant private FLAG_ARBITRUM_SEQ_OFFLINE = address(bytes20(bytes32(uint256(keccak256("chainlink.flags.arbitrum-seq-offline")) - 1)));
+    address constant private FLAG_BASE_SEQ_OFFLINE = address(bytes20(bytes32(uint256(keccak256("chainlink.flags.base-seq-offline")) - 1)));
 
     address public gov;
     address public chainlinkFlags;
@@ -289,7 +289,7 @@ contract VaultPriceFeed is IVaultPriceFeed {
         require(priceFeedAddress != address(0), "VaultPriceFeed: invalid price feed");
 
         if (chainlinkFlags != address(0)) {
-            bool isRaised = IChainlinkFlags(chainlinkFlags).getFlag(FLAG_ARBITRUM_SEQ_OFFLINE);
+            bool isRaised = IChainlinkFlags(chainlinkFlags).getFlag(FLAG_BASE_SEQ_OFFLINE);
             if (isRaised) {
                     // If flag is raised we shouldn't perform any critical operations
                 revert("Chainlink feeds are not being updated");
