@@ -1,12 +1,12 @@
 const { expect, use } = require("chai")
-const { solidity } = require("ethereum-waffle")
+require("@nomicfoundation/hardhat-chai-matchers");
 const { deployContract } = require("../../shared/fixtures")
 const { expandDecimals, getBlockTime, increaseTime, mineBlock, reportGasUsed } = require("../../shared/utilities")
 const { toChainlinkPrice } = require("../../shared/chainlink")
 const { toUsd, toNormalizedPrice } = require("../../shared/units")
 const { initVault, getBnbConfig, getBtcConfig, getDaiConfig, validateVaultBalance } = require("./helpers")
 
-use(solidity)
+
 
 describe("Vault.decreaseLongPosition", function () {
   const provider = waffle.provider
@@ -25,8 +25,8 @@ describe("Vault.decreaseLongPosition", function () {
   let yieldTracker0
   let vaultUtils
 
-  let glpManager
-  let glp
+  let elpManager
+  let elp
 
   beforeEach(async () => {
     bnb = await deployContract("Token", [])
@@ -71,8 +71,8 @@ describe("Vault.decreaseLongPosition", function () {
       false // _hasDynamicFees
     )
 
-    glp = await deployContract("GLP", [])
-    glpManager = await deployContract("GlpManager", [vault.address, usdg.address, glp.address, ethers.constants.AddressZero, 24 * 60 * 60])
+    elp = await deployContract("ELP", [])
+    elpManager = await deployContract("ElpManager", [vault.address, usdg.address, elp.address, ethers.constants.AddressZero, 24 * 60 * 60])
   })
 
   it("decreasePosition long", async () => {
@@ -100,13 +100,13 @@ describe("Vault.decreaseLongPosition", function () {
     await expect(vault.connect(user0).increasePosition(user0.address, btc.address, btc.address, toUsd(110), true))
       .to.be.revertedWith("Vault: reserve exceeds pool")
 
-    expect(await glpManager.getAumInUsdg(false)).eq("99700000000000000000") // 99.7
-    expect(await glpManager.getAumInUsdg(true)).eq("102192500000000000000") // 102.1925
+    expect(await elpManager.getAumInUsdg(false)).eq("99700000000000000000") // 99.7
+    expect(await elpManager.getAumInUsdg(true)).eq("102192500000000000000") // 102.1925
 
     await vault.connect(user0).increasePosition(user0.address, btc.address, btc.address, toUsd(90), true)
 
-    expect(await glpManager.getAumInUsdg(false)).eq("99702400000000000000") // 99.7024
-    expect(await glpManager.getAumInUsdg(true)).eq("100192710000000000000") // 100.19271
+    expect(await elpManager.getAumInUsdg(false)).eq("99702400000000000000") // 99.7024
+    expect(await elpManager.getAumInUsdg(true)).eq("100192710000000000000") // 100.19271
 
     let position = await vault.getPosition(user0.address, btc.address, btc.address, true)
     expect(position[0]).eq(toUsd(90)) // size
@@ -170,14 +170,14 @@ describe("Vault.decreaseLongPosition", function () {
     expect(await vault.poolAmounts(btc.address)).eq(274250 - 219)
     expect(await btc.balanceOf(user2.address)).eq(0)
 
-    expect(await glpManager.getAumInUsdg(false)).eq("102202981000000000000") // 102.202981
-    expect(await glpManager.getAumInUsdg(true)).eq("103183601000000000000") // 103.183601
+    expect(await elpManager.getAumInUsdg(false)).eq("102202981000000000000") // 102.202981
+    expect(await elpManager.getAumInUsdg(true)).eq("103183601000000000000") // 103.183601
 
     const tx = await vault.connect(user0).decreasePosition(user0.address, btc.address, btc.address, toUsd(3), toUsd(50), true, user2.address)
     await reportGasUsed(provider, tx, "decreasePosition gas used")
 
-    expect(await glpManager.getAumInUsdg(false)).eq("103917746000000000000") // 103.917746
-    expect(await glpManager.getAumInUsdg(true)).eq("107058666000000000000") // 107.058666
+    expect(await elpManager.getAumInUsdg(false)).eq("103917746000000000000") // 103.917746
+    expect(await elpManager.getAumInUsdg(true)).eq("107058666000000000000") // 107.058666
 
     leverage = await vault.getPositionLeverage(user0.address, btc.address, btc.address, true)
     expect(leverage).eq(57887) // ~5.8X leverage
@@ -213,31 +213,31 @@ describe("Vault.decreaseLongPosition", function () {
     await bnb.mint(vault.address, expandDecimals(10, 18))
     await vault.buyUSDG(bnb.address, user1.address)
 
-    expect(await glpManager.getAumInUsdg(false)).eq("4985000000000000000000") // 4985
-    expect(await glpManager.getAumInUsdg(true)).eq("4985000000000000000000") // 4985
+    expect(await elpManager.getAumInUsdg(false)).eq("4985000000000000000000") // 4985
+    expect(await elpManager.getAumInUsdg(true)).eq("4985000000000000000000") // 4985
 
     await bnb.mint(vault.address, expandDecimals(1, 18))
     await vault.connect(user0).increasePosition(user0.address, bnb.address, bnb.address, toUsd(1000), true)
 
-    expect(await glpManager.getAumInUsdg(false)).eq("4985000000000000000000") // 4985
-    expect(await glpManager.getAumInUsdg(true)).eq("4985000000000000000000") // 4985
+    expect(await elpManager.getAumInUsdg(false)).eq("4985000000000000000000") // 4985
+    expect(await elpManager.getAumInUsdg(true)).eq("4985000000000000000000") // 4985
 
     await bnbPriceFeed.setLatestAnswer(toChainlinkPrice(750))
     await bnbPriceFeed.setLatestAnswer(toChainlinkPrice(750))
     await bnbPriceFeed.setLatestAnswer(toChainlinkPrice(750))
 
-    expect(await glpManager.getAumInUsdg(false)).eq("7227000000000000000000") // 7227
-    expect(await glpManager.getAumInUsdg(true)).eq("7227000000000000000000") // 7227
+    expect(await elpManager.getAumInUsdg(false)).eq("7227000000000000000000") // 7227
+    expect(await elpManager.getAumInUsdg(true)).eq("7227000000000000000000") // 7227
 
     await vault.connect(user0).decreasePosition(user0.address, bnb.address, bnb.address, toUsd(0), toUsd(500), true, user2.address)
 
-    expect(await glpManager.getAumInUsdg(false)).eq("7227000000000000000250") // 7227.00000000000000025
-    expect(await glpManager.getAumInUsdg(true)).eq("7227000000000000000250") // 7227.00000000000000025
+    expect(await elpManager.getAumInUsdg(false)).eq("7227000000000000000250") // 7227.00000000000000025
+    expect(await elpManager.getAumInUsdg(true)).eq("7227000000000000000250") // 7227.00000000000000025
 
     await vault.connect(user0).decreasePosition(user0.address, bnb.address, bnb.address, toUsd(250), toUsd(100), true, user2.address)
 
-    expect(await glpManager.getAumInUsdg(false)).eq("7227000000000000000250") // 7227.00000000000000025
-    expect(await glpManager.getAumInUsdg(true)).eq("7227000000000000000250") // 7227.00000000000000025
+    expect(await elpManager.getAumInUsdg(false)).eq("7227000000000000000250") // 7227.00000000000000025
+    expect(await elpManager.getAumInUsdg(true)).eq("7227000000000000000250") // 7227.00000000000000025
   })
 
   it("decreasePosition long minProfitBasisPoints", async () => {

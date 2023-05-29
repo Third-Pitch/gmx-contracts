@@ -1,12 +1,12 @@
 const { expect, use } = require("chai")
-const { solidity } = require("ethereum-waffle")
+require("@nomicfoundation/hardhat-chai-matchers");
 const { deployContract } = require("../shared/fixtures")
 const { expandDecimals, getBlockTime, increaseTime, mineBlock, reportGasUsed } = require("../shared/utilities")
 const { toChainlinkPrice } = require("../shared/chainlink")
 const { toUsd, toNormalizedPrice } = require("../shared/units")
 const { initVault } = require("../core/Vault/helpers")
 
-use(solidity)
+
 
 const { AddressZero } = ethers.constants
 
@@ -14,8 +14,8 @@ describe("PriceFeedTimelock", function () {
   const provider = waffle.provider
   const [wallet, user0, user1, user2, user3, rewardManager, tokenManager, mintReceiver, positionRouter] = provider.getWallets()
   let vault
-  let glpManager
-  let glp
+  let elpManager
+  let elp
   let vaultUtils
   let vaultPriceFeed
   let usdg
@@ -48,8 +48,8 @@ describe("PriceFeedTimelock", function () {
     router = await deployContract("Router", [vault.address, usdg.address, bnb.address])
     vaultPriceFeed = await deployContract("VaultPriceFeed", [])
 
-    glp = await deployContract("GLP", [])
-    glpManager = await deployContract("GlpManager", [vault.address, usdg.address, glp.address, ethers.constants.AddressZero, 24 * 60 * 60])
+    elp = await deployContract("ELP", [])
+    elpManager = await deployContract("ElpManager", [vault.address, usdg.address, elp.address, ethers.constants.AddressZero, 24 * 60 * 60])
 
     const initVaultResult = await initVault(vault, router, usdg, vaultPriceFeed)
     vaultUtils = initVaultResult.vaultUtils
@@ -76,7 +76,7 @@ describe("PriceFeedTimelock", function () {
       5 * 24 * 60 * 60, // buffer
       tokenManager.address, // tokenManager
       mintReceiver.address, // mintReceiver
-      glpManager.address, // glpManager
+      elpManager.address, // elpManager
       user0.address, // rewardRouter
       expandDecimals(1000, 18), // maxTokenSupply
       50, // marginFeeBasisPoints 0.5%
@@ -162,7 +162,7 @@ describe("PriceFeedTimelock", function () {
       3 * 24 * 60 * 60, // _buffer
       tokenManager.address, // _tokenManager
       mintReceiver.address, // _mintReceiver
-      user0.address, // _glpManager
+      user0.address, // _elpManager
       user1.address, // _rewardRouter
       1000, // _maxTokenSupply
       10, // marginFeeBasisPoints
@@ -403,27 +403,27 @@ describe("PriceFeedTimelock", function () {
   it("withdrawToken", async () => {
     await timelock.setContractHandler(user0.address, true)
 
-    const gmx = await deployContract("GMX", [])
-    await gmx.setGov(timelock.address)
+    const eddx = await deployContract("EDDX", [])
+    await eddx.setGov(timelock.address)
 
-    await expect(timelock.connect(user0).withdrawToken(gmx.address, bnb.address, user0.address, 100))
+    await expect(timelock.connect(user0).withdrawToken(eddx.address, bnb.address, user0.address, 100))
       .to.be.revertedWith("Timelock: forbidden")
 
-    await expect(timelock.connect(wallet).withdrawToken(gmx.address, bnb.address, user0.address, 100))
+    await expect(timelock.connect(wallet).withdrawToken(eddx.address, bnb.address, user0.address, 100))
       .to.be.revertedWith("Timelock: action not signalled")
 
-    await expect(timelock.connect(user0).signalWithdrawToken(gmx.address, bnb.address, user0.address, 100))
+    await expect(timelock.connect(user0).signalWithdrawToken(eddx.address, bnb.address, user0.address, 100))
       .to.be.revertedWith("Timelock: forbidden")
 
-    await timelock.connect(wallet).signalWithdrawToken(gmx.address, bnb.address, user0.address, 100)
+    await timelock.connect(wallet).signalWithdrawToken(eddx.address, bnb.address, user0.address, 100)
 
-    await expect(timelock.connect(wallet).withdrawToken(gmx.address, bnb.address, user0.address, 100))
+    await expect(timelock.connect(wallet).withdrawToken(eddx.address, bnb.address, user0.address, 100))
       .to.be.revertedWith("Timelock: action time not yet passed")
 
     await increaseTime(provider, 4 * 24 * 60 * 60)
     await mineBlock(provider)
 
-    await expect(timelock.connect(wallet).withdrawToken(gmx.address, bnb.address, user0.address, 100))
+    await expect(timelock.connect(wallet).withdrawToken(eddx.address, bnb.address, user0.address, 100))
       .to.be.revertedWith("Timelock: action time not yet passed")
 
     await increaseTime(provider, 1 * 24 * 60 * 60 + 10)
@@ -432,21 +432,21 @@ describe("PriceFeedTimelock", function () {
     await expect(timelock.connect(wallet).withdrawToken(dai.address, bnb.address, user0.address, 100))
       .to.be.revertedWith("Timelock: action not signalled")
 
-    await expect(timelock.connect(wallet).withdrawToken(gmx.address, dai.address, user0.address, 100))
+    await expect(timelock.connect(wallet).withdrawToken(eddx.address, dai.address, user0.address, 100))
       .to.be.revertedWith("Timelock: action not signalled")
 
-    await expect(timelock.connect(wallet).withdrawToken(gmx.address, bnb.address, user1.address, 100))
+    await expect(timelock.connect(wallet).withdrawToken(eddx.address, bnb.address, user1.address, 100))
       .to.be.revertedWith("Timelock: action not signalled")
 
-    await expect(timelock.connect(wallet).withdrawToken(gmx.address, bnb.address, user0.address, 101))
+    await expect(timelock.connect(wallet).withdrawToken(eddx.address, bnb.address, user0.address, 101))
       .to.be.revertedWith("Timelock: action not signalled")
 
-    await expect(timelock.connect(wallet).withdrawToken(gmx.address, bnb.address, user0.address, 100))
+    await expect(timelock.connect(wallet).withdrawToken(eddx.address, bnb.address, user0.address, 100))
       .to.be.revertedWith("ERC20: transfer amount exceeds balance")
 
-    await bnb.mint(gmx.address, 100)
+    await bnb.mint(eddx.address, 100)
     expect(await bnb.balanceOf(user0.address)).eq(0)
-    await timelock.connect(wallet).withdrawToken(gmx.address, bnb.address, user0.address, 100)
+    await timelock.connect(wallet).withdrawToken(eddx.address, bnb.address, user0.address, 100)
     expect(await bnb.balanceOf(user0.address)).eq(100)
   })
 

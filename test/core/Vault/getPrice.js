@@ -1,12 +1,12 @@
 const { expect, use } = require("chai")
-const { solidity } = require("ethereum-waffle")
+require("@nomicfoundation/hardhat-chai-matchers");
 const { deployContract } = require("../../shared/fixtures")
 const { expandDecimals, getBlockTime, increaseTime, mineBlock, reportGasUsed, newWallet } = require("../../shared/utilities")
 const { toChainlinkPrice } = require("../../shared/chainlink")
 const { toUsd, toNormalizedPrice } = require("../../shared/units")
 const { initVault, getDaiConfig, getBnbConfig, getBtcConfig } = require("./helpers")
 
-use(solidity)
+
 
 describe("Vault.getPrice", function () {
   const provider = waffle.provider

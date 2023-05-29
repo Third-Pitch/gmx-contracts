@@ -1,12 +1,12 @@
 const { expect, use } = require("chai")
-const { solidity } = require("ethereum-waffle")
+require("@nomicfoundation/hardhat-chai-matchers");
 const { deployContract } = require("../shared/fixtures")
 const { expandDecimals, bigNumberify, getBlockTime, increaseTime,
   mineBlock, reportGasUsed, newWallet, getPriceBitArray, getPriceBits } = require("../shared/utilities")
 const { toChainlinkPrice } = require("../shared/chainlink")
 const { toUsd, toNormalizedPrice } = require("../shared/units")
 
-use(solidity)
+
 
 function getExpandedPrice(price, precision) {
   return bigNumberify(price).mul(expandDecimals(1, 30)).div(precision)
@@ -53,7 +53,7 @@ describe("FastPriceFeed", function () {
       5 * 24 * 60 * 60, // _buffer
       tokenManager.address, // _tokenManager
       mintReceiver.address, // _mintReceiver
-      user0.address, // _glpManager
+      user0.address, // _elpManager
       user1.address, // _rewardRouter
       expandDecimals(1000, 18), // _maxTokenSupply
       10, // marginFeeBasisPoints 0.1%

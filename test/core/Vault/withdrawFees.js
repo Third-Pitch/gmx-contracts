@@ -1,12 +1,12 @@
 const { expect, use } = require("chai")
-const { solidity } = require("ethereum-waffle")
+require("@nomicfoundation/hardhat-chai-matchers");
 const { deployContract } = require("../../shared/fixtures")
 const { expandDecimals, getBlockTime, increaseTime, mineBlock, reportGasUsed } = require("../../shared/utilities")
 const { toChainlinkPrice } = require("../../shared/chainlink")
 const { toUsd, toNormalizedPrice } = require("../../shared/units")
 const { initVault, getBnbConfig, getBtcConfig } = require("./helpers")
 
-use(solidity)
+
 
 describe("Vault.withdrawFees", function () {
   const provider = waffle.provider
@@ -181,7 +181,7 @@ describe("Vault.withdrawFees", function () {
       5 * 24 * 60 * 60, // _buffer
       user0.address, // _tokenManager
       user1.address, // _mintReceiver
-      user2.address, // _glpManager
+      user2.address, // _elpManager
       user3.address, // _rewardRouter
       expandDecimals(1000, 18), // _maxTokenSupply
       10, // marginFeeBasisPoints
@@ -262,7 +262,7 @@ describe("Vault.withdrawFees", function () {
       5 * 24 * 60 * 60, // _buffer
       user0.address, // _tokenManager
       user1.address, // _mintReceiver
-      user2.address, // _glpManager
+      user2.address, // _elpManager
       user3.address, // _rewardRouter
       expandDecimals(1000, 18), // _maxTokenSupply
       10, // marginFeeBasisPoints

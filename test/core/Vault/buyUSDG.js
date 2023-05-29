@@ -1,12 +1,12 @@
 const { expect, use } = require("chai")
-const { solidity } = require("ethereum-waffle")
+require("@nomicfoundation/hardhat-chai-matchers");
 const { deployContract } = require("../../shared/fixtures")
 const { expandDecimals, getBlockTime, increaseTime, mineBlock, reportGasUsed } = require("../../shared/utilities")
 const { toChainlinkPrice } = require("../../shared/chainlink")
 const { toUsd, toNormalizedPrice } = require("../../shared/units")
 const { initVault, getBnbConfig, getBtcConfig, getDaiConfig, validateVaultBalance } = require("./helpers")
 
-use(solidity)
+
 
 describe("Vault.buyUSDG", function () {
   const provider = waffle.provider
@@ -24,8 +24,8 @@ describe("Vault.buyUSDG", function () {
   let distributor0
   let yieldTracker0
 
-  let glpManager
-  let glp
+  let elpManager
+  let elp
 
   beforeEach(async () => {
     bnb = await deployContract("Token", [])
@@ -57,8 +57,8 @@ describe("Vault.buyUSDG", function () {
     await vaultPriceFeed.setTokenConfig(btc.address, btcPriceFeed.address, 8, false)
     await vaultPriceFeed.setTokenConfig(dai.address, daiPriceFeed.address, 8, false)
 
-    glp = await deployContract("GLP", [])
-    glpManager = await deployContract("GlpManager", [vault.address, usdg.address, glp.address, ethers.constants.AddressZero, 24 * 60 * 60])
+    elp = await deployContract("ELP", [])
+    elpManager = await deployContract("ElpManager", [vault.address, usdg.address, elp.address, ethers.constants.AddressZero, 24 * 60 * 60])
   })
 
   it("buyUSDG", async () => {
@@ -93,7 +93,7 @@ describe("Vault.buyUSDG", function () {
 
     await validateVaultBalance(expect, vault, bnb)
 
-    expect(await glpManager.getAumInUsdg(true)).eq(29700)
+    expect(await elpManager.getAumInUsdg(true)).eq(29700)
   })
 
   it("buyUSDG allows gov to mint", async () => {

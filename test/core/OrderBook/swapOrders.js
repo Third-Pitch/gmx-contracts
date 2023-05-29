@@ -1,5 +1,5 @@
 const { expect, use } = require("chai")
-const { solidity } = require("ethereum-waffle")
+require("@nomicfoundation/hardhat-chai-matchers");
 const { deployContract } = require("../../shared/fixtures")
 const { expandDecimals, reportGasUsed, gasUsed } = require("../../shared/utilities")
 const { toChainlinkPrice } = require("../../shared/chainlink")
@@ -14,7 +14,7 @@ const {
     getTriggerRatio
 } = require('./helpers');
 
-use(solidity);
+;
 
 const BTC_PRICE = 60000;
 const BNB_PRICE = 300;
@@ -488,7 +488,7 @@ describe("OrderBook, swap orders", function () {
         const value = defaults.executionFee;
         const path = [btc.address, bnb.address];
         const minOut = await getMinOut(
-            tokenDecimals, 
+            tokenDecimals,
             getTriggerRatio(toUsd(BTC_PRICE), toUsd(BNB_PRICE - 50)),
             path,
             amountIn
@@ -533,7 +533,7 @@ describe("OrderBook, swap orders", function () {
         const value = defaults.executionFee;
         const path = [dai.address, bnb.address];
         const minOut = await getMinOut(
-            tokenDecimals, 
+            tokenDecimals,
             getTriggerRatio(toUsd(1), toUsd(BNB_PRICE + 50)),
             path,
             amountIn
@@ -574,7 +574,7 @@ describe("OrderBook, swap orders", function () {
         // minOut is not mandatory for such orders but with minOut it's possible to limit max price
         // e.g. user would not be happy if he sets order "buy if BTC > $65000" and order executes with $75000
         const minOut = await getMinOut(
-            tokenDecimals, 
+            tokenDecimals,
             getTriggerRatio(toUsd(BNB_PRICE), toUsd(63000)),
             path,
             amountIn
@@ -626,7 +626,7 @@ describe("OrderBook, swap orders", function () {
         // minOut is not mandatory for such orders but with minOut it's possible to limit max price
         // e.g. user would not be happy if he sets order "buy if BTC > $65000" and order executes with $75000
         const minOut = await getMinOut(
-            tokenDecimals, 
+            tokenDecimals,
             getTriggerRatio(toUsd(BNB_PRICE), toUsd(63000)),
             path,
             amountIn
@@ -678,7 +678,7 @@ describe("OrderBook, swap orders", function () {
         // minOut is not mandatory for such orders but with minOut it's possible to limit max price
         // e.g. user would not be happy if he sets order "buy if BTC > $65000" and order executes with $75000
         const minOut = await getMinOut(
-            tokenDecimals, 
+            tokenDecimals,
             getTriggerRatio(toUsd(1), toUsd(63000)),
             path,
             amountIn
@@ -733,7 +733,7 @@ describe("OrderBook, swap orders", function () {
         // minOut is not mandatory for such orders but with minOut it's possible to limit max price
         // e.g. user would not be happy if he sets order "buy if BTC > $65000" and order executes with $75000
         const minOut = await getMinOut(
-            tokenDecimals, 
+            tokenDecimals,
             getTriggerRatio(toUsd(1), toUsd(63000)),
             path,
             amountIn
@@ -788,7 +788,7 @@ describe("OrderBook, swap orders", function () {
         // minOut is not mandatory for such orders but with minOut it's possible to limit max price
         // e.g. user would not be happy if he sets order "buy if BTC > $65000" and order executes with $75000
         const minOut = await getMinOut(
-            tokenDecimals, 
+            tokenDecimals,
             getTriggerRatio(toUsd(1), toUsd(63000)),
             path,
             amountIn
@@ -843,7 +843,7 @@ describe("OrderBook, swap orders", function () {
         // minOut is not mandatory for such orders but with minOut it's possible to limit max price
         // e.g. user would not be happy if he sets order "buy if BTC > $65000" and order executes with $75000
         const minOut = await getMinOut(
-            tokenDecimals, 
+            tokenDecimals,
             getTriggerRatio(toUsd(60000), toUsd(1)),
             path,
             amountIn

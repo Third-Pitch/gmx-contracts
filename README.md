@@ -1,7 +1,7 @@
-# GMX Contracts
-Contracts for GMX.
+# EDDX Contracts
+Contracts for EDDX.
 
-Docs at https://gmxio.gitbook.io/gmx/contracts.
+Docs at https://eddxio.gitbook.io/eddx/contracts.
 
 ## Install Dependencies
 If npx is not installed yet:

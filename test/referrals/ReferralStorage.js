@@ -1,9 +1,9 @@
 const { expect, use } = require("chai")
-const { solidity } = require("ethereum-waffle")
+require("@nomicfoundation/hardhat-chai-matchers");
 const { deployContract } = require("../shared/fixtures")
 const { expandDecimals } = require("../shared/utilities")
 
-use(solidity)
+
 
 const { AddressZero, HashZero } = ethers.constants
 const { keccak256 } = ethers.utils
@@ -11,7 +11,7 @@ const { keccak256 } = ethers.utils
 // Tier0 (5% discount, 5% rebate) = Tier {totalRebate = 1000, defaultTradersDiscountShare = 5000}
 // Tier1 (12% discount, 8% rebate) = Tier {totalRebate = 2000, defaultTradersDiscountShare = 6000}
 // Tier2 (12% discount, 15% rebate) = Tier {totalRebate = 2700, defaultTradersDiscountShare = 4444}
-// for the last tier extra EsGMX incentives will be handled off-chain
+// for the last tier extra EsEDDX incentives will be handled off-chain
 describe("ReferralStorage", function () {
   const provider = waffle.provider
   const [wallet, user0, user1, user2, user3, user4, rewardManager, tokenManager, mintReceiver] = provider.getWallets()
@@ -25,7 +25,7 @@ describe("ReferralStorage", function () {
       5 * 24 * 60 * 60, // _buffer
       tokenManager.address, // _tokenManager
       mintReceiver.address, // _mintReceiver
-      user0.address, // _glpManager
+      user0.address, // _elpManager
       user1.address, // _rewardRouter
       expandDecimals(1000, 18), // _maxTokenSupply
       50, // marginFeeBasisPoints 0.5%

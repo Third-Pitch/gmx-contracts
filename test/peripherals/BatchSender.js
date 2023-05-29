@@ -1,8 +1,8 @@
 const { expect, use } = require("chai")
-const { solidity } = require("ethereum-waffle")
+require("@nomicfoundation/hardhat-chai-matchers");
 const { deployContract } = require("../shared/fixtures")
 
-use(solidity)
+
 
 describe("BatchSender", function () {
   const provider = waffle.provider

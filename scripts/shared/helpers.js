@@ -4,28 +4,18 @@ const parse = require('csv-parse')
 
 const network = (process.env.HARDHAT_NETWORK || 'mainnet');
 
-const ARBITRUM = 42161
-const AVALANCHE = 43114
 const BASE = 84531
 
 const {
-  ARBITRUM_URL,
-  AVAX_URL,
-  ARBITRUM_DEPLOY_KEY,
-  AVAX_DEPLOY_KEY,
   BASE_URL,
   BASE_DEPLOY_KEY,
 } = require("../../env.json")
 
 const providers = {
-  // arbitrum: new ethers.providers.JsonRpcProvider(ARBITRUM_URL),
-  // avax: new ethers.providers.JsonRpcProvider(AVAX_URL),
   base: new ethers.providers.JsonRpcProvider(BASE_URL),
 }
 
 const signers = {
-  // arbitrum: new ethers.Wallet(ARBITRUM_DEPLOY_KEY).connect(providers.arbitrum),
-  // avax: new ethers.Wallet(ARBITRUM_DEPLOY_KEY).connect(providers.avax),
   base: new ethers.Wallet(BASE_DEPLOY_KEY).connect(providers.base)
 }
 
@@ -48,14 +38,6 @@ const readCsv = async (file) => {
 }
 
 function getChainId(network) {
-  if (network === "arbitrum") {
-    return 42161
-  }
-
-  if (network === "avax") {
-    return 43114
-  }
-
   if (network === "base") {
     return 84531
   }
@@ -125,9 +107,10 @@ async function deployContract(name, args, label, options) {
   }
   const contract = await contractFactory.deploy(...args)
   const argStr = args.map((i) => `"${i}"`).join(" ")
-  console.info(`Deploying ${info} ${contract.address} ${argStr}`)
+  console.info(`Deployed ${info} ${network} ${contract.address} ${argStr}`)
+  writeVerifyLog(`npx hardhat verify --network ${network} ${contract.address} ${argStr}\n`)
   await contract.deployTransaction.wait()
-  console.info("... Completed!")
+  console.info(`${info} ... Completed!`)
   return contract
 }
 
@@ -139,7 +122,8 @@ async function contractAt(name, address, provider, options) {
   return await contractFactory.attach(address)
 }
 
-const tmpAddressesFilepath = path.join(__dirname, '..', '..', `.tmp-addresses-${process.env.HARDHAT_NETWORK}.json`)
+const tmpAddressesFilepath = path.join(__dirname, '..', '..', `.contract-${process.env.HARDHAT_NETWORK}.json`)
+const tmpVerifyFilepath = path.join(__dirname, '..', '..', `.verify-${process.env.HARDHAT_NETWORK}.log`)
 
 function readTmpAddresses() {
   if (fs.existsSync(tmpAddressesFilepath)) {
@@ -151,6 +135,10 @@ function readTmpAddresses() {
 function writeTmpAddresses(json) {
   const tmpAddresses = Object.assign(readTmpAddresses(), json)
   fs.writeFileSync(tmpAddressesFilepath, JSON.stringify(tmpAddresses))
+}
+
+function writeVerifyLog(content) {
+  fs.appendFileSync(tmpVerifyFilepath, content)
 }
 
 // batchLists is an array of lists
@@ -192,8 +180,6 @@ async function updateTokensPerInterval(distributor, tokensPerInterval, label) {
 }
 
 module.exports = {
-  ARBITRUM,
-  AVALANCHE,
   BASE,
   providers,
   signers,

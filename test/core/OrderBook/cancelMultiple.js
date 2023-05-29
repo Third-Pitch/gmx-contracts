@@ -1,5 +1,5 @@
 const { expect, use } = require("chai")
-const { solidity } = require("ethereum-waffle")
+require("@nomicfoundation/hardhat-chai-matchers");
 const { deployContract } = require("../../shared/fixtures")
 const { expandDecimals, reportGasUsed, gasUsed } = require("../../shared/utilities")
 const { toChainlinkPrice } = require("../../shared/chainlink")
@@ -16,7 +16,7 @@ const {
     PRICE_PRECISION
 } = require('./helpers');
 
-use(solidity);
+;
 
 const BTC_PRICE = 60000;
 const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";

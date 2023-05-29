@@ -11,7 +11,7 @@ contract PositionRouterCallbackReceiverTest is IPositionRouterCallbackReceiver {
         bool isIncrease
     );
 
-    function gmxPositionCallback(bytes32 positionKey, bool isExecuted, bool isIncrease) override external {
+    function eddxPositionCallback(bytes32 positionKey, bool isExecuted, bool isIncrease) override external {
         emit CallbackCalled(positionKey, isExecuted, isIncrease);
     }
 }

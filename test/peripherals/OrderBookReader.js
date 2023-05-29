@@ -1,12 +1,12 @@
 const { expect, use } = require("chai")
-const { solidity } = require("ethereum-waffle")
+require("@nomicfoundation/hardhat-chai-matchers");
 const { deployContract } = require("../shared/fixtures")
 const { expandDecimals, getBlockTime, increaseTime, mineBlock, reportGasUsed } = require("../shared/utilities")
 const { initVault } = require("../core/Vault/helpers")
 const { toChainlinkPrice } = require("../shared/chainlink")
 const { toUsd, toNormalizedPrice } = require("../shared/units")
 
-use(solidity)
+
 
 const PRICE_PRECISION = ethers.BigNumber.from(10).pow(30);
 
@@ -47,7 +47,7 @@ describe("OrderBookReader", function () {
       vault.address,
       bnb.address,
       usdg.address,
-      400000, 
+      400000,
       expandDecimals(5, 30) // minPurchseTokenAmountUsd
     );
     reader = await deployContract("OrderBookReader", [])
